@@ -1,0 +1,514 @@
+{
+  "name": "SUB_PROCESAR_CV_ XX-NO TOCAR-XX",
+  "nodes": [
+    {
+      "parameters": {
+        "functionCode": "for (const item of items) {\n  if (item.binary?.['attachment_0']) {\n    item.binary['data'] = item.binary['attachment_0'];\n  }\n}\nreturn items;"
+      },
+      "id": "c60dbbf4-6043-47bd-8d2c-2abf78833544",
+      "name": "Mover binario1",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -2420,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "return items.filter(item => item.binary && item.binary.attachment_0 && ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(item.binary.attachment_0.mimeType));"
+      },
+      "id": "d6c0de0d-7140-4f03-95db-c64dbb00d21d",
+      "name": "Filtrar y Normalizar Binario2",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -2560,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.filter(item => item.binary && Object.values(item.binary).some(bin => ['application/pdf','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(bin.mimeType)));"
+      },
+      "name": "Filtrar Archivos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2260,
+        -100
+      ],
+      "id": "89f5476c-3f84-457d-b753-2b7e399f3799"
+    },
+    {
+      "parameters": {
+        "jsCode": "for (const item of items) {\n  const key = Object.keys(item.binary)[0];\n  item.binary.data = item.binary[key];\n}\nreturn items;"
+      },
+      "name": "Normalizar Binario",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2120,
+        -100
+      ],
+      "id": "bc377661-6e5b-4b73-8bf6-a355d81e73c7"
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  // si no existe data, pero sí attachment_0, lo copia\n  if (!item.binary?.data && item.binary?.['attachment_0']) {\n    item.binary.data = item.binary['attachment_0'];\n  }\n  return item;\n});"
+      },
+      "name": "Code Normalizar data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1040,
+        -80
+      ],
+      "id": "caf83b1a-fcb3-4564-8663-7bbeedc8a43a"
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.filter(item => item.binary && Object.values(item.binary).some(bin => ['application/pdf','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(bin.mimeType)));"
+      },
+      "name": "Filtrar Archivos1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1960,
+        -100
+      ],
+      "id": "fc36918f-1d7e-4b75-97fc-4b6a18f1ed35"
+    },
+    {
+      "parameters": {
+        "jsCode": "for (const item of items) {\n  const key = Object.keys(item.binary)[0];\n  item.binary.data = item.binary[key];\n}\nreturn items;"
+      },
+      "name": "Normalizar Binario1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1800,
+        -100
+      ],
+      "id": "5f32358b-6f43-46a8-93bd-1bdd4f692c31"
+    },
+    {
+      "parameters": {
+        "jsCode": "const MAX_SIZE = 3 * 1024 * 1024; // 3MB\nconst ALLOWED_MIME_TYPES = [\n  'application/pdf',\n  'application/msword',\n  'application/vnd.openxmlformats-officedocument.wordprocessingml.document'\n];\n\nreturn items.filter(item => {\n  if (!item.binary) return false;\n\n  const bin = item.binary.data || item.binary['attachment_0'];\n  if (!bin) return false;\n\n  const fileSize = parseInt(bin.fileSize);\n  const mimeType = bin.mimeType?.toLowerCase();\n\n  return (\n    !isNaN(fileSize) &&\n    fileSize > 0 &&\n    fileSize <= MAX_SIZE &&\n    typeof mimeType === 'string' &&\n    ALLOWED_MIME_TYPES.includes(mimeType)\n  );\n});\n"
+      },
+      "name": "Validar Tipo y Tamaño1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1560,
+        -20
+      ],
+      "id": "006fda67-900c-4571-bae3-28cc51056d31",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const SAFE_PATTERN = /^[a-zA-Z0-9_\\-\\.]{1,100}\\.(pdf|docx?|DOCX?)$/;\n\nreturn items.filter(item => {\n  const bin = item.binary?.data || item.binary?.['attachment_0'];\n\n  return (\n    bin &&\n    typeof bin.fileName === 'string' &&\n    SAFE_PATTERN.test(bin.fileName)\n  );\n});"
+      },
+      "name": "Validar Nombre1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1400,
+        -20
+      ],
+      "id": "24155dee-1fdd-40b7-bdb9-90db45fccf6e",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const EXTENSION_WHITELIST = ['pdf', 'doc', 'docx'];\nfunction getExtension(filename) {\n  return filename.split('.').pop().toLowerCase();\n}\nfunction hasMultipleExtensions(filename) {\n  const matches = filename.match(/\\./g);\n  return matches && matches.length > 1;\n}\nreturn items.filter(item => {\n  const bin = item.binary?.data || item.binary?.['attachment_0'];\n  if (!bin || typeof bin.fileName !== 'string') return false;\n  const ext = getExtension(bin.fileName);\n  return EXTENSION_WHITELIST.includes(ext) && !hasMultipleExtensions(bin.fileName);\n});"
+      },
+      "name": "Validar Doble Extensión1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1240,
+        -20
+      ],
+      "id": "32ddeef2-f527-4eae-86c0-d1d9387ebbac"
+    },
+    {
+      "parameters": {
+        "fileName": "=C:/Users/sistemas1/Desktop/CV CENTRAL/PENDIENTES/{{$binary.data.fileName}}",
+        "options": {}
+      },
+      "name": "Guardar PDF1",
+      "type": "n8n-nodes-base.writeBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        -300,
+        -140
+      ],
+      "id": "edf20f6a-6737-4c76-9c76-40cf23615cc2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const SUSPICIOUS_STRINGS = [\n  '<html', '<script', '<iframe', 'onload=', 'onerror=',\n  'javascript:', 'vbscript:', 'data:text/html',\n  '<?php', '<form', '<input', '<embed', '<object',\n  'shell_exec', 'cmd.exe', 'powershell', 'subprocess',\n  'os.system', 'eval(', 'exec(', 'base64,', '0x3c7363726970743e', // \"<script>\" hex\n  '.bat', '.cmd', '.exe', '.dll', '.vbs',\n  'union select', '--', 'or 1=1', 'drop table', 'insert into',\n  'xp_cmdshell', 'load_file', 'information_schema',\n  '%3Cscript', '%253Cscript' // <script> URL y doble codificado\n];\n\nreturn items.filter(item => {\n  const bin = item.binary?.data;\n  if (!bin || !bin.data) return false;\n\n  const content = Buffer.from(bin.data, 'base64').toString('utf8').toLowerCase();\n\n  const suspiciousMatch = SUSPICIOUS_STRINGS.find(tag =>\n    content.includes(tag)\n  );\n\n  if (suspiciousMatch) {\n    item.json.blockedReason = `Detected: ${suspiciousMatch}`;\n    return false;\n  }\n\n  return true;\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -860,
+        -20
+      ],
+      "id": "27e4f706-124d-49c1-a80e-4dfd3f9aa052",
+      "name": "SUSPICIOUS_STRINGS"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ !$json.blockedReason }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "0f6495be-cc46-4b43-8a9a-30598564f752",
+      "name": "¿Está limpio?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -540,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "fileName": "=={{ $binary.logFile.fileName }}",
+        "dataPropertyName": "logFile",
+        "options": {
+          "append": false
+        }
+      },
+      "id": "4289af16-8d29-48b9-9ab8-632e69566bf1",
+      "name": "Guardar LOG",
+      "type": "n8n-nodes-base.writeBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        220,
+        40
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "functionCode": "items[0].binary.file = items[0].binary.data;\nreturn items;"
+      },
+      "id": "78cdc91a-ad19-42bb-a872-fc516ca896bc",
+      "name": "Set Binario",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -700,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const contenido = {\n    reason: item.json.blockedReason || \"❌ Rechazado sin razón clara\",\n    file: item.binary?.data?.fileName || \"Sin nombre\"\n  };\n\n  const buffer = Buffer.from(JSON.stringify(contenido, null, 2), 'utf8');\n  item.json.logMessageB64 = buffer.toString('base64');\n  item.json.logFileName = item.json.logFileName || 'log_rechazo.json';\n\n  return item;\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -140,
+        60
+      ],
+      "id": "6efd27e1-4f23-4ea5-bb77-a0016c0e4180",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "logMessageB64",
+        "binaryPropertyName": "logFile",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        20,
+        60
+      ],
+      "id": "006d1f81-84cb-4e73-b9b5-c71bbe17db72",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "logFileName",
+              "value": "={{ $binary.data.fileName.replace(/\\.[^/.]+$/, '') + '_RECHAZADO.json' }}"
+            },
+            {
+              "name": "blockedReason",
+              "value": "={{ $json.blockedReason || '❌ Rechazado por validación desconocida – revisar cadena de filtros' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3bc72cee-9001-476d-9af9-7cc47de467b1",
+      "name": "SET Log Rechazo1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        -340,
+        60
+      ]
+    },
+    {
+      "parameters": {
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2820,
+        -100
+      ],
+      "id": "2c08c0f1-dc56-4317-9d8a-22a5d4bec3a9",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -3080,
+        -100
+      ],
+      "id": "27b52fb2-516f-441b-8654-134512181867",
+      "name": "When Executed by Another Workflow"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Mover binario1": {
+      "main": [
+        [
+          {
+            "node": "Filtrar Archivos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtrar y Normalizar Binario2": {
+      "main": [
+        [
+          {
+            "node": "Mover binario1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtrar Archivos": {
+      "main": [
+        [
+          {
+            "node": "Normalizar Binario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizar Binario": {
+      "main": [
+        [
+          {
+            "node": "Filtrar Archivos1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code Normalizar data": {
+      "main": [
+        [
+          {
+            "node": "SUSPICIOUS_STRINGS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtrar Archivos1": {
+      "main": [
+        [
+          {
+            "node": "Normalizar Binario1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizar Binario1": {
+      "main": [
+        [
+          {
+            "node": "Validar Tipo y Tamaño1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Tipo y Tamaño1": {
+      "main": [
+        [
+          {
+            "node": "Validar Nombre1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Nombre1": {
+      "main": [
+        [
+          {
+            "node": "Validar Doble Extensión1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Doble Extensión1": {
+      "main": [
+        [
+          {
+            "node": "Code Normalizar data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SUSPICIOUS_STRINGS": {
+      "main": [
+        [
+          {
+            "node": "Set Binario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Está limpio?": {
+      "main": [
+        [
+          {
+            "node": "Guardar PDF1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SET Log Rechazo1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Binario": {
+      "main": [
+        [
+          {
+            "node": "¿Está limpio?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Guardar LOG",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SET Log Rechazo1": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Filtrar y Normalizar Binario2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "2c410116-7474-4e9c-8f95-1888a7692439",
+  "meta": {
+    "instanceId": "84f44db5bd3dc4edcdb8bb60547fbf0816264437984a9cbfa6a5c62fc72959da"
+  },
+  "id": "FOHFJNkjUGYAkO6N",
+  "tags": []
+}
