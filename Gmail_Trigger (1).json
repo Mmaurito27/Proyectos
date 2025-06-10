@@ -1,0 +1,212 @@
+{
+  "name": "Gmail Trigger",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {},
+        "options": {
+          "downloadAttachments": true
+        }
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        160,
+        740
+      ],
+      "id": "0827df6e-f158-48df-bcb8-59807d53fabb",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "I8KoLQ5wqU5FsSIo",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "FOHFJNkjUGYAkO6N",
+          "mode": "list",
+          "cachedResultName": "SUB_PROCESAR_CV_ XX-NO TOCAR-XX"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        320,
+        740
+      ],
+      "id": "eab220ca-78d2-4353-b5f8-e2e7f1a1cb27",
+      "name": "Execute Workflow",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "fileName": "C:\\Users\\sistemas1\\Desktop\\CV CENTRAL\\LOGS\\log_cv.txt",
+        "options": {
+          "append": true
+        }
+      },
+      "id": "38cfe943-02dd-4ca3-ab94-b5d325402c7f",
+      "name": "Escribir Log1",
+      "type": "n8n-nodes-base.writeBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "data",
+              "value": "={{ '[' + new Date().toLocaleString('sv-SE') + '] [GMAIL TRIGGER] ✅ Trigger ejecutado correctamente | Workflow: SUB_PROCESAR_CV_ XX-NO TOCAR-XX' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3c8af984-ac7e-4dc9-a156-807b5515e168",
+      "name": "Log OK1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        700,
+        620
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "data",
+              "value": "=={{ '[' + new Date().toLocaleString('sv-SE') + '] [GMAIL TRIGGER] ❌ ERROR | Info completa: ' + JSON.stringify($json.error || $json) }}\n"
+            }
+          ]
+        },
+        "options": {
+          "dotNotation": true
+        }
+      },
+      "id": "21e97731-4202-42b4-8692-05bb7f2da9ee",
+      "name": "Log ERROR1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        700,
+        820
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $json.data || 'Log vacío';\nconst buffer = Buffer.from(text, 'utf8');\n\nreturn [\n  {\n    binary: {\n      data: {\n        data: buffer,\n        mimeType: 'text/plain',\n        fileName: 'log_cv.txt'\n      }\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        980,
+        700
+      ],
+      "id": "2e8bda39-3a43-44e9-b939-1fa719a1758a",
+      "name": "Code"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Execute Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Workflow": {
+      "main": [
+        [
+          {
+            "node": "Log OK1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Log ERROR1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log OK1": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log ERROR1": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Escribir Log1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "2043efa3-a67a-4080-a958-865759607bde",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "84f44db5bd3dc4edcdb8bb60547fbf0816264437984a9cbfa6a5c62fc72959da"
+  },
+  "id": "ZzhrhvsxYnT8cMTx",
+  "tags": []
+}
