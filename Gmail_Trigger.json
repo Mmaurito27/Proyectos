@@ -41,7 +41,9 @@
         },
         "workflowInputs": {
           "mappingMode": "defineBelow",
-          "value": {},
+          "value": {
+            "messageId": "={{ $json.id }}"
+          },
           "matchingColumns": [],
           "schema": [],
           "attemptToConvertTypes": false,

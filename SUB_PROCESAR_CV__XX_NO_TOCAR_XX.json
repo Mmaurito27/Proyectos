@@ -200,6 +200,54 @@
     },
     {
       "parameters": {
+        "resource": "messageLabel",
+        "operation": "remove",
+        "messageId": "={{ $json.messageId }}",
+        "labelIds": [
+          "UNREAD"
+        ]
+      },
+      "id": "364921f9-a419-45f2-9811-11797e6b2818",
+      "name": "Mark as Read",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [
+        420,
+        40
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "I8KoLQ5wqU5FsSIo",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messageLabel",
+        "operation": "add",
+        "messageId": "={{ $json.messageId }}",
+        "labelIds": [
+          "Processed"
+        ]
+      },
+      "id": "e48f463d-20fa-4667-aa3d-2fc34d8b0c90",
+      "name": "Label Processed",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [
+        620,
+        40
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "I8KoLQ5wqU5FsSIo",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
         "functionCode": "items[0].binary.file = items[0].binary.data;\nreturn items;"
       },
       "id": "78cdc91a-ad19-42bb-a872-fc516ca896bc",
@@ -461,6 +509,28 @@
         [
           {
             "node": "Guardar LOG",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardar LOG": {
+      "main": [
+        [
+          {
+            "node": "Mark as Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark as Read": {
+      "main": [
+        [
+          {
+            "node": "Label Processed",
             "type": "main",
             "index": 0
           }
